@@ -1,0 +1,36 @@
+Context and Objective
+
+You will create the first stage of a SaaS application designed to help users automatically generate YouTube video scripts by analyzing the best-performing videos from a specific channel. The SaaS will use the YouTube and Claude.ai APIs to analyze existing content and generate new content optimized for YouTube.
+
+What you need to do for this first step :
+
+1. technical set-up of the project
+
+- Initialize a Next.js project with integrated Tailwind CSS.
+- Configure TypeScript right from the start.
+- Use the Tailwind CSS framework combined with shadcn/ui to quickly create a simple, intuitive user interface.
+
+2. Creation of essential pages (Frontend)
+
+Create the following pages:
+- Welcome (Home)**: A very simple page with a short description of the SaaS and a “Start Analysis” button.
+- Analysis**: A page containing an input field allowing the user to paste in a link to a YouTube channel, with a clear button to start the analysis (this button will not yet be functional in this stage, just the interface).
+
+3. Creating the initial backend structure
+
+- Prepare a simple route API in Next.js that will eventually be used to communicate with the YouTube API.
+- This route API for now will simply return a basic test JSON `{ status: “API functional” }` to confirm that everything is ready to use.
+
+4. Deployment
+
+- Connect this project to GitHub and host it on Vercel so that you can test directly online after each modification.
+
+5. Clear summary of deliverables
+
+At the end of this step, you should have :
+- A functional, well-structured Next.js project, configured with TypeScript and Tailwind.
+- Two simple, uncluttered pages (Home and Analysis).
+- A working route API (even basic).
+- A functional version deployed on Vercel for immediate testing.
+
+This step forms the clear, clean technical base on which all advanced functionalities will then be progressively added.
