@@ -7,6 +7,28 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
+// ✅ Définition du type pour éviter l'erreur TypeScript
+type ResultData = {
+  channelInfo: {
+    title: string;
+  };
+  videoCount: number;
+  script: {
+    title: string;
+    introduction: string;
+    sections: { title: string; content: string }[];
+    conclusion: string;
+    callToAction: string;
+  };
+  videos: {
+    id: string;
+    title: string;
+    description: string;
+    thumbnailUrl: string;
+  }[];
+};
+
+
 export default function ResultatsPage() {
   const searchParams = useSearchParams();
   const [channelUrl, setChannelUrl] = useState<string | null>(null);
