@@ -141,21 +141,35 @@ export async function getPopularVideos(channelId: string, maxResults = config.ma
       throw new Error('Impossible d\'obtenir les détails des vidéos');
     }
     
-    return detailsData.items.map((video: { id: { videoId: string }, snippet: { title: string, description: string, thumbnails: string } }) => ({
-      id: video.id,
+    return detailsData.items.map((video: { 
+      id: { videoId: string }, 
+      snippet: { 
+        title: string, 
+        description: string, 
+        thumbnails: { 
+          default?: { url: string }, 
+          medium?: { url: string }, 
+          high?: { url: string }, 
+          standard?: { url: string }, 
+          maxres?: { url: string } 
+        } 
+      }, 
+      statistics: { viewCount?: string, likeCount?: string, commentCount?: string } 
+    }) => ({
+      id: video.id.videoId,  // Correction ici pour récupérer l'ID correct
       title: video.snippet.title,
       description: video.snippet.description,
       thumbnailUrl: video.snippet.thumbnails?.default?.url || 
-              video.snippet.thumbnails?.medium?.url || 
-              video.snippet.thumbnails?.high?.url || 
-              video.snippet.thumbnails?.standard?.url || 
-              video.snippet.thumbnails?.maxres?.url || 
-              "https://via.placeholder.com/150", // Image par défaut si aucune miniature n'est disponible
+                    video.snippet.thumbnails?.medium?.url || 
+                    video.snippet.thumbnails?.high?.url || 
+                    video.snippet.thumbnails?.standard?.url || 
+                    video.snippet.thumbnails?.maxres?.url || 
+                    "https://via.placeholder.com/150", // Image par défaut
       publishedAt: video.snippet.publishedAt,
-      viewCount: video.statistics.viewCount || '0',
-      likeCount: video.statistics.likeCount || '0',
-      commentCount: video.statistics.commentCount || '0'
-    }));
+      viewCount: video.statistics?.viewCount || '0',
+      likeCount: video.statistics?.likeCount || '0',
+      commentCount: video.statistics?.commentCount || '0'
+    }));    
   } catch (error) {
     console.error('Erreur lors de la récupération des vidéos populaires:', error);
     return [];
