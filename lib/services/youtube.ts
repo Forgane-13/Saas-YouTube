@@ -145,7 +145,12 @@ export async function getPopularVideos(channelId: string, maxResults = config.ma
       id: video.id,
       title: video.snippet.title,
       description: video.snippet.description,
-      thumbnailUrl: video.snippet.thumbnails.default.url,
+      thumbnailUrl: video.snippet.thumbnails?.default?.url || 
+              video.snippet.thumbnails?.medium?.url || 
+              video.snippet.thumbnails?.high?.url || 
+              video.snippet.thumbnails?.standard?.url || 
+              video.snippet.thumbnails?.maxres?.url || 
+              "https://via.placeholder.com/150", // Image par défaut si aucune miniature n'est disponible
       publishedAt: video.snippet.publishedAt,
       viewCount: video.statistics.viewCount || '0',
       likeCount: video.statistics.likeCount || '0',
