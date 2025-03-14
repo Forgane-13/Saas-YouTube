@@ -128,7 +128,7 @@ export async function getPopularVideos(channelId: string, maxResults = config.ma
     }
     
     // Limitons le nombre de vidéos à analyser
-    const videoIds = data.items.slice(0, maxResults).map((item: any) => item.id.videoId);
+    const videoIds = data.items.slice(0, maxResults).map((item: { id: { videoId: string } }) => item.id.videoId);
     
     // Maintenant, obtenons les détails de ces vidéos
     const detailsResponse = await fetch(
@@ -141,7 +141,7 @@ export async function getPopularVideos(channelId: string, maxResults = config.ma
       throw new Error('Impossible d\'obtenir les détails des vidéos');
     }
     
-    return detailsData.items.map((video: any) => ({
+    return detailsData.items.map((video: { id: { videoId: string }, snippet: { title: string, description: string, thumbnails: any } }) => ({
       id: video.id,
       title: video.snippet.title,
       description: video.snippet.description,
