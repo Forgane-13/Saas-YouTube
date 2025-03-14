@@ -14,7 +14,7 @@ export default function Home() {
         </CardHeader>
         <CardContent className="text-center">
           <p className="mb-6">
-            Notre outil utilise l&apos;intelligence artificielle pour analyser les vidéos les plus performantes d'une chaîne YouTube
+            Notre outil utilise l&apos;intelligence artificielle pour analyser les vidéos les plus performantes d&apos;une chaîne YouTube
             et générer des scripts optimisés pour votre propre contenu.
           </p>
           <p className="mb-6">

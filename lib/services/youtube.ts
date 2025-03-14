@@ -141,7 +141,7 @@ export async function getPopularVideos(channelId: string, maxResults = config.ma
       throw new Error('Impossible d\'obtenir les détails des vidéos');
     }
     
-    return detailsData.items.map((video: { id: { videoId: string }, snippet: { title: string, description: string, thumbnails: any } }) => ({
+    return detailsData.items.map((video: { id: { videoId: string }, snippet: { title: string, description: string, thumbnails: string } }) => ({
       id: video.id,
       title: video.snippet.title,
       description: video.snippet.description,
