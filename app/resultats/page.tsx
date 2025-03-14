@@ -1,4 +1,6 @@
-"use client"; // ✅ Assure que ce composant est exécuté côté client
+"use client";
+
+export const dynamic = "force-dynamic"; // ✅ Empêche le rendu statique (SSG)
 
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
@@ -7,40 +9,18 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-// ✅ Définition du type pour éviter l'erreur TypeScript
-type ResultData = {
-  channelInfo: {
-    title: string;
-  };
-  videoCount: number;
-  script: {
-    title: string;
-    introduction: string;
-    sections: { title: string; content: string }[];
-    conclusion: string;
-    callToAction: string;
-  };
-  videos: {
-    id: string;
-    title: string;
-    description: string;
-    thumbnailUrl: string;
-  }[];
-};
-
 
 export default function ResultatsPage() {
   const searchParams = useSearchParams();
   const [channelUrl, setChannelUrl] = useState<string | null>(null);
-
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<ResultData | null>(null);
 
-  // ✅ Utiliser useEffect pour récupérer les paramètres après le premier rendu
+  // ✅ Utiliser `useEffect` pour récupérer les paramètres après le rendu initial
   useEffect(() => {
     const url = searchParams.get("channelUrl");
-    setChannelUrl(url);
+    if (url) setChannelUrl(url);
   }, [searchParams]);
 
   useEffect(() => {
@@ -49,24 +29,11 @@ export default function ResultatsPage() {
     async function fetchData() {
       try {
         setIsLoading(true);
-        if (!channelUrl) {
-  setError("Aucune URL de chaîne fournie.");
-  setIsLoading(false);
-  return;
-}
-
-if (!channelUrl) {
-  setError("Aucune URL de chaîne fournie.");
-  setIsLoading(false);
-  return;
-}
-
-const response = await fetch(`/api/youtube/route?channelUrl=${encodeURIComponent(channelUrl)}`);
+        const response = await fetch(`/api/youtube/route?channelUrl=${encodeURIComponent(channelUrl)}`);
         if (!response.ok) throw new Error("Erreur lors de la récupération des données.");
         const result = await response.json();
         setData(result);
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      } catch (error) {
+      } catch (err) {
         setError("Erreur lors du chargement des résultats.");
       } finally {
         setIsLoading(false);
@@ -80,7 +47,7 @@ const response = await fetch(`/api/youtube/route?channelUrl=${encodeURIComponent
   if (error) return <ErrorComponent message={error} />;
   if (!data) return <NoResultsComponent />;
 
-  return <ResultsDisplay data={data} channelUrl={channelUrl} />;
+  return <ResultsDisplay data={data} />;
 }
 
 // ✅ Composant de chargement
@@ -148,8 +115,7 @@ function NoResultsComponent() {
 }
 
 // ✅ Composant principal qui affiche les résultats
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function ResultsDisplay({ data, channelUrl }: { data: ResultData; channelUrl: string | null }) {
+function ResultsDisplay({ data }: { data: ResultData }) {
   return (
     <main className="flex min-h-screen flex-col items-center justify-start p-4 md:p-24">
       <Card className="w-full max-w-4xl mb-8">
