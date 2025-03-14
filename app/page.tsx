@@ -9,23 +9,23 @@ export default function Home() {
         <CardHeader>
           <CardTitle className="text-3xl font-bold text-center">Bienvenue sur ScriptGen AI</CardTitle>
           <CardDescription className="text-center text-lg mt-2">
-            Générez automatiquement des scripts de vidéos YouTube optimisés en analysant les meilleures vidéos d'une chaîne
+            Générez automatiquement des scripts de vidéos YouTube optimisés en analysant les meilleures vidéos dune chaîne
           </CardDescription>
         </CardHeader>
         <CardContent className="text-center">
           <p className="mb-6">
-            Notre outil utilise l'intelligence artificielle pour analyser les vidéos les plus performantes d'une chaîne YouTube
+            Notre outil utilise lintelligence artificielle pour analyser les vidéos les plus performantes dune chaîne YouTube
             et générer des scripts optimisés pour votre propre contenu.
           </p>
           <p className="mb-6">
-            Collez simplement le lien d'une chaîne YouTube, et notre système analysera les tendances, le style et les sujets
+            Collez simplement le lien dune chaîne YouTube, et notre système analysera les tendances, le style et les sujets
             qui fonctionnent le mieux pour créer un script personnalisé pour votre prochaine vidéo.
           </p>
         </CardContent>
         <CardFooter className="flex justify-center">
           <Link href="/analyse">
             <Button size="lg" className="font-semibold">
-              Commencer l'analyse
+              Commencer lanalyse
             </Button>
           </Link>
         </CardFooter>
