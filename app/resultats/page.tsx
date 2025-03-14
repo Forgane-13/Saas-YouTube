@@ -1,115 +1,98 @@
-"use client";
+"use client"; // ✅ Indique que ce fichier est côté client
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-interface Section {
-  title: string;
-  content: string;
-}
-
-interface Script {
-  title: string;
-  introduction: string;
-  sections: Section[];
-  conclusion: string;
-  callToAction: string;
-}
-
-interface ChannelInfo {
-  id: string;
-  title: string;
-  description: string;
-  thumbnailUrl: string;
-  subscriberCount: string;
-  videoCount: string;
-}
-
-interface ResultData {
-  status: string;
-  channelInfo: ChannelInfo;
-  videoCount: number;
-  script: Script;
-}
-
 export default function ResultatsPage() {
+  return (
+    <Suspense fallback={<LoadingComponent />}>
+      <ResultatsContent />
+    </Suspense>
+  );
+}
+
+// ✅ Composant séparé pour gérer `useSearchParams()`
+function ResultatsContent() {
   const searchParams = useSearchParams();
   const channelUrl = searchParams.get("channelUrl");
-  
+
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<ResultData | null>(null);
 
   useEffect(() => {
     if (!channelUrl) {
-      setError("URL de la chaîne manquante");
+      setError("Aucune URL de chaîne fournie.");
       setIsLoading(false);
       return;
     }
 
-    const fetchData = async () => {
+    async function fetchData() {
       try {
-        const response = await fetch("/api/youtube", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ channelUrl }),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || "Une erreur est survenue");
-        }
-
-        const resultData = await response.json();
-        setData(resultData);
+        const response = await fetch(`/api/youtube/route?channelUrl=${encodeURIComponent(channelUrl)}`);
+        if (!response.ok) throw new Error("Erreur lors de la récupération des données.");
+        const result = await response.json();
+        setData(result);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Une erreur est survenue");
+        setError("Erreur lors du chargement des résultats.");
       } finally {
         setIsLoading(false);
       }
-    };
+    }
 
     fetchData();
   }, [channelUrl]);
 
-  if (isLoading) {
-    return (
-      <main className="flex min-h-screen flex-col items-center justify-center p-4 md:p-24">
-        <Card className="w-full max-w-4xl">
+  if (isLoading) return <LoadingComponent />;
+  if (error) return <div className="text-red-500">{error}</div>;
+
+  return (
+    <div className="p-6">
+      <h1 className="text-2xl font-bold">Résultats d'analyse</h1>
+      <p>Chaîne analysée : {channelUrl}</p>
+
+      {data && (
+        <Card className="mt-4">
           <CardHeader>
-            <Skeleton className="h-8 w-3/4 mx-auto mb-2" />
-            <Skeleton className="h-4 w-1/2 mx-auto" />
+            <CardTitle>Analyse des vidéos populaires</CardTitle>
+            <CardDescription>Voici les vidéos les plus performantes de cette chaîne.</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-3/4" />
-            <div className="space-y-2 mt-6">
-              <Skeleton className="h-6 w-1/3" />
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-5/6" />
-            </div>
-            <div className="space-y-2 mt-6">
-              <Skeleton className="h-6 w-1/3" />
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-5/6" />
-            </div>
+          <CardContent>
+            {data.videos.map((video: any) => (
+              <div key={video.id} className="border p-4 my-2">
+                <img src={video.thumbnailUrl} alt={video.title} className="w-full h-40 object-cover" />
+                <h3 className="text-lg font-bold mt-2">{video.title}</h3>
+                <p>{video.description}</p>
+              </div>
+            ))}
           </CardContent>
           <CardFooter>
-            <Skeleton className="h-10 w-1/4 mx-auto" />
+            <Link href="/">
+              <Button>Retour</Button>
+            </Link>
           </CardFooter>
         </Card>
-      </main>
-    );
-  }
+      )}
+    </div>
+  );
+}
+
+// ✅ Composant de chargement
+function LoadingComponent() {
+  return (
+    <div className="p-6">
+      <h1 className="text-2xl font-bold">Chargement...</h1>
+      <Skeleton className="w-full h-32 mt-4" />
+      <Skeleton className="w-full h-6 mt-2" />
+      <Skeleton className="w-full h-6 mt-2" />
+    </div>
+  );
+}
+
 
   if (error) {
     return (
