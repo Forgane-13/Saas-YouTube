@@ -19,16 +19,24 @@ function generatePrompt(channel: YouTubeChannel, videos: YouTubeVideo[]): string
   const videoData = videos.map(video => ({
     title: video.title,
     description: video.description,
-    views: parseInt(video.viewCount),
-    likes: parseInt(video.likeCount),
-    comments: parseInt(video.commentCount)
+    views: parseInt(video.viewCount) || 0,
+    likes: parseInt(video.likeCount) || 0,
+    comments: parseInt(video.commentCount) || 0
   }));
 
   // Trier les vidéos par nombre de vues
   videoData.sort((a, b) => b.views - a.views);
 
+  // Limiter la longueur des descriptions pour éviter les prompts trop longs
+  const processedVideoData = videoData.map(video => ({
+    ...video,
+    description: video.description.length > 500 
+      ? video.description.substring(0, 500) + '...' 
+      : video.description
+  }));
+
   // Créer un résumé des vidéos populaires
-  const videoSummaries = videoData
+  const videoSummaries = processedVideoData
     .map(video => `Titre: ${video.title}\nDescription: ${video.description}\nVues: ${video.views}\nLikes: ${video.likes}`)
     .join('\n\n');
 
@@ -74,6 +82,14 @@ Réponds uniquement au format JSON suivant:
 // Fonction pour générer un script avec Claude
 export async function generateScript(channel: YouTubeChannel, videos: YouTubeVideo[]): Promise<GeneratedScript | null> {
   try {
+    if (!config.claudeApiKey) {
+      throw new Error('Clé API Claude non configurée');
+    }
+
+    if (!videos || videos.length === 0) {
+      throw new Error('Aucune vidéo fournie pour l\'analyse');
+    }
+
     const prompt = generatePrompt(channel, videos);
     
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -96,6 +112,11 @@ export async function generateScript(channel: YouTubeChannel, videos: YouTubeVid
       })
     });
     
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`Erreur API Claude: ${errorData.error?.message || 'Erreur inconnue'}`);
+    }
+    
     const data = await response.json();
     
     if (!data.content || !data.content[0] || !data.content[0].text) {
@@ -110,15 +131,26 @@ export async function generateScript(channel: YouTubeChannel, videos: YouTubeVid
       throw new Error('Impossible d\'extraire le JSON de la réponse');
     }
     
-    const scriptData = JSON.parse(jsonMatch[0]);
-    
-    return {
-      title: scriptData.title,
-      introduction: scriptData.introduction,
-      sections: scriptData.sections,
-      conclusion: scriptData.conclusion,
-      callToAction: scriptData.callToAction
-    };
+    try {
+      const scriptData = JSON.parse(jsonMatch[0]);
+      
+      // Vérifier que tous les champs requis sont présents
+      if (!scriptData.title || !scriptData.introduction || !Array.isArray(scriptData.sections) || 
+          !scriptData.conclusion || !scriptData.callToAction) {
+        throw new Error('Format de script incomplet');
+      }
+      
+      return {
+        title: scriptData.title,
+        introduction: scriptData.introduction,
+        sections: scriptData.sections,
+        conclusion: scriptData.conclusion,
+        callToAction: scriptData.callToAction
+      };
+    } catch (parseError) {
+      console.error('Erreur lors du parsing du JSON:', parseError);
+      throw new Error('Format de réponse invalide');
+    }
   } catch (error) {
     console.error('Erreur lors de la génération du script:', error);
     return null;

@@ -65,25 +65,59 @@ export async function getChannelInfo(channelUrl: string): Promise<YouTubeChannel
     if (!channelUrl.includes('/channel/')) {
       // Déterminer le paramètre à utiliser en fonction du format de l'URL
       let paramName = 'forUsername';
+      let paramValue = '';
       
       if (channelUrl.includes('/c/')) {
+        const parts = channelUrl.split('/c/');
+        if (parts.length > 1) {
+          paramValue = parts[1].split('/')[0];
+        }
         paramName = 'forHandle';
+      } else if (channelUrl.includes('/user/')) {
+        const parts = channelUrl.split('/user/');
+        if (parts.length > 1) {
+          paramValue = parts[1].split('/')[0];
+        }
       } else if (channelUrl.includes('/@')) {
+        const parts = channelUrl.split('/@');
+        if (parts.length > 1) {
+          paramValue = parts[1].split('/')[0];
+        }
         paramName = 'forHandle';
-        actualChannelId = channelUrl.split('/@')[1];
+      } else {
+        // Si aucun format reconnu, utiliser l'URL complète
+        paramValue = channelUrl;
       }
       
-      const response = await fetch(
-        `https://www.googleapis.com/youtube/v3/channels?part=id&${paramName}=${actualChannelId}&key=${config.youtubeApiKey}`
-      );
-      
-      const data = await response.json();
-      
-      if (!data.items || data.items.length === 0) {
-        throw new Error('Chaîne non trouvée');
+      // Pour les nouveaux formats (@username), nous devons utiliser une approche différente
+      // car l'API YouTube ne supporte pas directement la recherche par handle
+      if (paramName === 'forHandle') {
+        // Rechercher la chaîne par son nom
+        const searchResponse = await fetch(
+          `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(paramValue)}&type=channel&maxResults=1&key=${config.youtubeApiKey}`
+        );
+        
+        const searchData = await searchResponse.json();
+        
+        if (!searchData.items || searchData.items.length === 0) {
+          throw new Error('Chaîne non trouvée');
+        }
+        
+        actualChannelId = searchData.items[0].id.channelId;
+      } else {
+        // Pour les formats username traditionnels
+        const response = await fetch(
+          `https://www.googleapis.com/youtube/v3/channels?part=id&${paramName}=${encodeURIComponent(paramValue)}&key=${config.youtubeApiKey}`
+        );
+        
+        const data = await response.json();
+        
+        if (!data.items || data.items.length === 0) {
+          throw new Error('Chaîne non trouvée');
+        }
+        
+        actualChannelId = data.items[0].id;
       }
-      
-      actualChannelId = data.items[0].id;
     }
     
     // Maintenant que nous avons l'ID, obtenons les informations de la chaîne
@@ -104,8 +138,8 @@ export async function getChannelInfo(channelUrl: string): Promise<YouTubeChannel
       title: channel.snippet.title,
       description: channel.snippet.description,
       thumbnailUrl: channel.snippet.thumbnails.default.url,
-      subscriberCount: channel.statistics.subscriberCount,
-      videoCount: channel.statistics.videoCount
+      subscriberCount: channel.statistics.subscriberCount || '0',
+      videoCount: channel.statistics.videoCount || '0'
     };
   } catch (error) {
     console.error('Erreur lors de la récupération des informations de la chaîne:', error);
@@ -128,7 +162,14 @@ export async function getPopularVideos(channelId: string, maxResults = config.ma
     }
     
     // Limitons le nombre de vidéos à analyser
-    const videoIds = data.items.slice(0, maxResults).map((item: { id: { videoId: string } }) => item.id.videoId);
+    const videoIds = data.items
+      .slice(0, maxResults)
+      .map((item: any) => item.id.videoId)
+      .filter(Boolean); // Filtrer les valeurs null ou undefined
+    
+    if (videoIds.length === 0) {
+      throw new Error('Aucune vidéo valide trouvée');
+    }
     
     // Maintenant, obtenons les détails de ces vidéos
     const detailsResponse = await fetch(
@@ -141,36 +182,19 @@ export async function getPopularVideos(channelId: string, maxResults = config.ma
       throw new Error('Impossible d\'obtenir les détails des vidéos');
     }
     
-    return detailsData.items.map((video: { 
-      id: { videoId: string }, 
-      snippet: { 
-        title: string, 
-        description: string,
-        publishedAt: string,  // ✅ Ajout de publishedAt
-        thumbnails: { 
-          default?: { url: string }, 
-          medium?: { url: string }, 
-          high?: { url: string }, 
-          standard?: { url: string }, 
-          maxres?: { url: string } 
-        } 
-      }, 
-      statistics: { viewCount?: string, likeCount?: string, commentCount?: string } 
-    }) => ({
-      id: video.id.videoId,  // Correction ici pour récupérer l'ID correct
-      title: video.snippet.title,
-      description: video.snippet.description,
+    return detailsData.items.map((video: any) => ({
+      id: video.id,
+      title: video.snippet.title || '',
+      description: video.snippet.description || '',
       thumbnailUrl: video.snippet.thumbnails?.default?.url || 
-                    video.snippet.thumbnails?.medium?.url || 
-                    video.snippet.thumbnails?.high?.url || 
-                    video.snippet.thumbnails?.standard?.url || 
-                    video.snippet.thumbnails?.maxres?.url || 
-                    "https://via.placeholder.com/150", // Image par défaut
-      publishedAt: video.snippet.publishedAt,
+                   video.snippet.thumbnails?.medium?.url || 
+                   video.snippet.thumbnails?.high?.url || 
+                   'https://via.placeholder.com/120x90',
+      publishedAt: video.snippet.publishedAt || '',
       viewCount: video.statistics?.viewCount || '0',
       likeCount: video.statistics?.likeCount || '0',
       commentCount: video.statistics?.commentCount || '0'
-    }));    
+    }));
   } catch (error) {
     console.error('Erreur lors de la récupération des vidéos populaires:', error);
     return [];
