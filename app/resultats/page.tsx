@@ -31,7 +31,8 @@ export default function ResultatsPage() {
         if (!response.ok) throw new Error("Erreur lors de la récupération des données.");
         const result = await response.json();
         setData(result);
-      } catch (_) {
+      } catch (error) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         setError("Erreur lors du chargement des résultats.");
       } finally {
         setIsLoading(false);
@@ -113,7 +114,8 @@ function NoResultsComponent() {
 }
 
 // ✅ Composant principal qui affiche les résultats
-function ResultsDisplay({ data, _channelUrl }: { data: ResultData; channelUrl: string | null }) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function ResultsDisplay({ data, channelUrl }: { data: ResultData; channelUrl: string | null }) {
   return (
     <main className="flex min-h-screen flex-col items-center justify-start p-4 md:p-24">
       <Card className="w-full max-w-4xl mb-8">
