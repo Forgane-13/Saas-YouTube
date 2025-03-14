@@ -1,6 +1,4 @@
-"use client";
-
-export const dynamic = "force-dynamic"; // ✅ Empêche le rendu statique (SSG)
+"use client"; // ✅ Assure que ce composant est exécuté côté client
 
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
@@ -9,15 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-
-export default function ResultatsPage() {
+export default function ResultatsClient() {
   const searchParams = useSearchParams();
   const [channelUrl, setChannelUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<ResultData | null>(null);
 
-  // ✅ Utiliser `useEffect` pour récupérer les paramètres après le rendu initial
   useEffect(() => {
     const url = searchParams.get("channelUrl");
     if (url) setChannelUrl(url);
@@ -126,14 +122,6 @@ function ResultsDisplay({ data }: { data: ResultData }) {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold mb-2">{data.script.title}</h2>
-            <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-md">
-              <h3 className="font-semibold mb-2">Introduction</h3>
-              <p className="whitespace-pre-line">{data.script.introduction}</p>
-            </div>
-          </div>
-
           {data.script.sections.map((section, index) => (
             <div key={index} className="mb-6">
               <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-md">
@@ -142,20 +130,6 @@ function ResultsDisplay({ data }: { data: ResultData }) {
               </div>
             </div>
           ))}
-
-          <div className="mb-6">
-            <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-md">
-              <h3 className="font-semibold mb-2">Conclusion</h3>
-              <p className="whitespace-pre-line">{data.script.conclusion}</p>
-            </div>
-          </div>
-
-          <div>
-            <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-md">
-              <h3 className="font-semibold mb-2">Appel à l&apos;action</h3>
-              <p className="whitespace-pre-line">{data.script.callToAction}</p>
-            </div>
-          </div>
         </CardContent>
       </Card>
     </main>
