@@ -25,7 +25,10 @@ export async function POST(request: Request) {
       message: "Cette fonctionnalité sera implémentée dans les prochaines étapes"
     });
     
-  } catch (_) {
+  } catch (
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _
+  ) {
     return NextResponse.json(
       { error: "Erreur lors du traitement de la demande" },
       { status: 500 }
