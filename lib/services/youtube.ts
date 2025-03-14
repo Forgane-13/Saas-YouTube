@@ -21,6 +21,118 @@ export interface YouTubeVideo {
   commentCount: string;
 }
 
+// Interfaces pour les réponses de l'API YouTube
+interface YouTubeSearchResultItem {
+  id: {
+    kind: string;
+    videoId?: string;
+    channelId?: string;
+    playlistId?: string;
+  };
+  snippet: {
+    title: string;
+    description: string;
+    publishedAt: string;
+    thumbnails: {
+      default?: { url: string; width: number; height: number };
+      medium?: { url: string; width: number; height: number };
+      high?: { url: string; width: number; height: number };
+      standard?: { url: string; width: number; height: number };
+      maxres?: { url: string; width: number; height: number };
+    };
+    channelTitle: string;
+    channelId: string;
+  };
+}
+
+interface YouTubeSearchResponse {
+  kind: string;
+  etag: string;
+  nextPageToken?: string;
+  prevPageToken?: string;
+  pageInfo: {
+    totalResults: number;
+    resultsPerPage: number;
+  };
+  items: YouTubeSearchResultItem[];
+}
+
+interface YouTubeVideoItem {
+  kind: string;
+  etag: string;
+  id: string;
+  snippet: {
+    publishedAt: string;
+    channelId: string;
+    title: string;
+    description: string;
+    thumbnails: {
+      default?: { url: string; width: number; height: number };
+      medium?: { url: string; width: number; height: number };
+      high?: { url: string; width: number; height: number };
+      standard?: { url: string; width: number; height: number };
+      maxres?: { url: string; width: number; height: number };
+    };
+    channelTitle: string;
+    tags?: string[];
+    categoryId: string;
+  };
+  statistics: {
+    viewCount?: string;
+    likeCount?: string;
+    dislikeCount?: string;
+    favoriteCount?: string;
+    commentCount?: string;
+  };
+}
+
+interface YouTubeVideoResponse {
+  kind: string;
+  etag: string;
+  items: YouTubeVideoItem[];
+  pageInfo: {
+    totalResults: number;
+    resultsPerPage: number;
+  };
+}
+
+interface YouTubeChannelItem {
+  kind: string;
+  etag: string;
+  id: string;
+  snippet: {
+    title: string;
+    description: string;
+    customUrl?: string;
+    publishedAt: string;
+    thumbnails: {
+      default?: { url: string; width: number; height: number };
+      medium?: { url: string; width: number; height: number };
+      high?: { url: string; width: number; height: number };
+    };
+    localized?: {
+      title: string;
+      description: string;
+    };
+  };
+  statistics: {
+    viewCount?: string;
+    subscriberCount?: string;
+    hiddenSubscriberCount?: boolean;
+    videoCount?: string;
+  };
+}
+
+interface YouTubeChannelResponse {
+  kind: string;
+  etag: string;
+  pageInfo: {
+    totalResults: number;
+    resultsPerPage: number;
+  };
+  items: YouTubeChannelItem[];
+}
+
 // Fonction pour extraire l'ID de la chaîne à partir de l'URL
 export function extractChannelId(url: string): string | null {
   // Formats possibles:
@@ -97,20 +209,20 @@ export async function getChannelInfo(channelUrl: string): Promise<YouTubeChannel
           `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(paramValue)}&type=channel&maxResults=1&key=${config.youtubeApiKey}`
         );
         
-        const searchData = await searchResponse.json();
+        const searchData = await searchResponse.json() as YouTubeSearchResponse;
         
         if (!searchData.items || searchData.items.length === 0) {
           throw new Error('Chaîne non trouvée');
         }
         
-        actualChannelId = searchData.items[0].id.channelId;
+        actualChannelId = searchData.items[0].id.channelId || '';
       } else {
         // Pour les formats username traditionnels
         const response = await fetch(
           `https://www.googleapis.com/youtube/v3/channels?part=id&${paramName}=${encodeURIComponent(paramValue)}&key=${config.youtubeApiKey}`
         );
         
-        const data = await response.json();
+        const data = await response.json() as YouTubeChannelResponse;
         
         if (!data.items || data.items.length === 0) {
           throw new Error('Chaîne non trouvée');
@@ -125,7 +237,7 @@ export async function getChannelInfo(channelUrl: string): Promise<YouTubeChannel
       `https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id=${actualChannelId}&key=${config.youtubeApiKey}`
     );
     
-    const data = await response.json();
+    const data = await response.json() as YouTubeChannelResponse;
     
     if (!data.items || data.items.length === 0) {
       throw new Error('Chaîne non trouvée');
@@ -137,7 +249,7 @@ export async function getChannelInfo(channelUrl: string): Promise<YouTubeChannel
       id: channel.id,
       title: channel.snippet.title,
       description: channel.snippet.description,
-      thumbnailUrl: channel.snippet.thumbnails.default.url,
+      thumbnailUrl: channel.snippet.thumbnails?.default?.url || '',
       subscriberCount: channel.statistics.subscriberCount || '0',
       videoCount: channel.statistics.videoCount || '0'
     };
@@ -155,7 +267,7 @@ export async function getPopularVideos(channelId: string, maxResults = config.ma
       `https://www.googleapis.com/youtube/v3/search?part=id&channelId=${channelId}&maxResults=50&order=viewCount&type=video&key=${config.youtubeApiKey}`
     );
     
-    const data = await response.json();
+    const data = await response.json() as YouTubeSearchResponse;
     
     if (!data.items || data.items.length === 0) {
       throw new Error('Aucune vidéo trouvée');
@@ -164,8 +276,8 @@ export async function getPopularVideos(channelId: string, maxResults = config.ma
     // Limitons le nombre de vidéos à analyser
     const videoIds = data.items
       .slice(0, maxResults)
-      .map((item: any) => item.id.videoId)
-      .filter(Boolean); // Filtrer les valeurs null ou undefined
+      .map((item: YouTubeSearchResultItem) => item.id.videoId)
+      .filter((id): id is string => id !== undefined); // Filtrer les valeurs null ou undefined
     
     if (videoIds.length === 0) {
       throw new Error('Aucune vidéo valide trouvée');
@@ -176,13 +288,13 @@ export async function getPopularVideos(channelId: string, maxResults = config.ma
       `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&id=${videoIds.join(',')}&key=${config.youtubeApiKey}`
     );
     
-    const detailsData = await detailsResponse.json();
+    const detailsData = await detailsResponse.json() as YouTubeVideoResponse;
     
     if (!detailsData.items || detailsData.items.length === 0) {
       throw new Error('Impossible d\'obtenir les détails des vidéos');
     }
     
-    return detailsData.items.map((video: any) => ({
+    return detailsData.items.map((video: YouTubeVideoItem) => ({
       id: video.id,
       title: video.snippet.title || '',
       description: video.snippet.description || '',
