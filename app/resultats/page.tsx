@@ -31,8 +31,8 @@ export default function ResultatsPage() {
         if (!response.ok) throw new Error("Erreur lors de la récupération des données.");
         const result = await response.json();
         setData(result);
-      } catch (error) {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (error) {
         setError("Erreur lors du chargement des résultats.");
       } finally {
         setIsLoading(false);
