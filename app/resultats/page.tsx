@@ -49,7 +49,19 @@ export default function ResultatsPage() {
     async function fetchData() {
       try {
         setIsLoading(true);
-        const response = await fetch(`/api/youtube/route?channelUrl=${encodeURIComponent(channelUrl)}`);
+        if (!channelUrl) {
+  setError("Aucune URL de chaîne fournie.");
+  setIsLoading(false);
+  return;
+}
+
+if (!channelUrl) {
+  setError("Aucune URL de chaîne fournie.");
+  setIsLoading(false);
+  return;
+}
+
+const response = await fetch(`/api/youtube/route?channelUrl=${encodeURIComponent(channelUrl)}`);
         if (!response.ok) throw new Error("Erreur lors de la récupération des données.");
         const result = await response.json();
         setData(result);
