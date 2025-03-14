@@ -38,7 +38,7 @@ export default function AnalysePage() {
         <CardHeader>
           <CardTitle className="text-3xl font-bold text-center">Analyse de Chaîne YouTube</CardTitle>
           <CardDescription className="text-center text-lg mt-2">
-            Entrez l'URL d'une chaîne YouTube pour analyser son contenu
+            Entrez l&apos;URL d&apos;une chaîne YouTube pour analyser son contenu
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -74,7 +74,7 @@ export default function AnalysePage() {
         <CardFooter className="flex justify-center">
           <Link href="/">
             <Button variant="outline" className="font-semibold">
-              Retour à l'accueil
+              Retour à l&apos;accueil
             </Button>
           </Link>
         </CardFooter>

@@ -118,7 +118,7 @@ export default function ResultatsPage() {
           <CardHeader>
             <CardTitle className="text-3xl font-bold text-center text-red-600">Erreur</CardTitle>
             <CardDescription className="text-center text-lg mt-2">
-              Une erreur est survenue lors de l'analyse
+              Une erreur est survenue lors de l&apos;analyse
             </CardDescription>
           </CardHeader>
           <CardContent className="text-center">
@@ -127,7 +127,7 @@ export default function ResultatsPage() {
           <CardFooter className="flex justify-center">
             <Link href="/analyse">
               <Button variant="outline" className="font-semibold">
-                Retour à l'analyse
+                Retour à l&apos;analyse
               </Button>
             </Link>
           </CardFooter>
@@ -143,7 +143,7 @@ export default function ResultatsPage() {
           <CardHeader>
             <CardTitle className="text-3xl font-bold text-center">Aucun résultat</CardTitle>
             <CardDescription className="text-center text-lg mt-2">
-              Aucun résultat n'a été trouvé
+              Aucun résultat n&apos;a été trouvé
             </CardDescription>
           </CardHeader>
           <CardContent className="text-center">
@@ -154,7 +154,7 @@ export default function ResultatsPage() {
           <CardFooter className="flex justify-center">
             <Link href="/analyse">
               <Button variant="outline" className="font-semibold">
-                Retour à l'analyse
+                Retour à l&apos;analyse
               </Button>
             </Link>
           </CardFooter>
@@ -169,7 +169,7 @@ export default function ResultatsPage() {
         <CardHeader>
           <CardTitle className="text-3xl font-bold text-center">Script généré pour {data.channelInfo.title}</CardTitle>
           <CardDescription className="text-center text-lg mt-2">
-            Basé sur l'analyse de {data.videoCount} vidéos populaires
+            Basé sur l&apos;analyse de {data.videoCount} vidéos populaires
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -199,7 +199,7 @@ export default function ResultatsPage() {
 
           <div>
             <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-md">
-              <h3 className="font-semibold mb-2">Appel à l'action</h3>
+              <h3 className="font-semibold mb-2">Appel à l&apos;action</h3>
               <p className="whitespace-pre-line">{data.script.callToAction}</p>
             </div>
           </div>
