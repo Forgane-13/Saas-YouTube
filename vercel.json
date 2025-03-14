@@ -5,21 +5,6 @@
   "installCommand": "npm install",
   "framework": "nextjs",
   "regions": ["cdg1"],
-  "env": {
-    "NEXT_PUBLIC_API_URL": {
-      "description": "URL de base de l'API"
-    }
-  },
-  "build": {
-    "env": {
-      "YOUTUBE_API_KEY": {
-        "description": "Clé API YouTube Data v3"
-      },
-      "CLAUDE_API_KEY": {
-        "description": "Clé API Claude d'Anthropic"
-      }
-    }
-  },
   "headers": [
     {
       "source": "/api/(.*)",
