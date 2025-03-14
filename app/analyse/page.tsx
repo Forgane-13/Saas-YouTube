@@ -25,7 +25,7 @@ function isValidYouTubeChannelUrl(url: string): boolean {
       urlObj.pathname.includes('/@');
     
     return isChannel;
-  } catch (_e) {
+  } catch {
     // URL mal formée
     return false;
   }
