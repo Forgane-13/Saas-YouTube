@@ -145,7 +145,8 @@ export async function getPopularVideos(channelId: string, maxResults = config.ma
       id: { videoId: string }, 
       snippet: { 
         title: string, 
-        description: string, 
+        description: string,
+        publishedAt: string,  // ✅ Ajout de publishedAt
         thumbnails: { 
           default?: { url: string }, 
           medium?: { url: string }, 
